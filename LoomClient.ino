@@ -14,6 +14,13 @@ int KeyIndex=0;//your network key Index number (for WEP)
 
 int status = WL_IDLE_STATUS;// the WiFi radio's status
 
+
+//Socket
+const uint16_t port = 8090;
+const char * host = "127.0.0.1";//ip on which server is running
+
+
+
 void setup(){
 	WiFi.setPins(8,7,4,2);
 
@@ -23,7 +30,35 @@ void setup(){
 		;
 	}
 
-	//attempt to connect ti WiFi network:
+	WiFiConnect();
+
+}
+
+
+void loop(){
+
+	WiFiClient client;
+
+	if(!client.connect(host, port)){
+
+		Serial.println("Connection to host failed");
+		delay(1000);
+		return;
+	}
+
+	Serial.println("Connected to server successful!");
+	
+
+
+
+
+}
+
+
+
+void WiFiConnect(){
+
+	//attempt to connect to  WiFi network:
 	while(status != WL_CONNECTED){
 		Serial.print("Attempting to connect to SSID: ");
 		Serial.println(ssid);
@@ -40,17 +75,7 @@ void setup(){
 	//Once you are connected
 	Serial.print("You're conected to the network");
 	printWiFiStatus();
-
-
 }
-
-
-void loop(){
-
-
-}
-
-
 
 void printWiFiStatus(){
 	//print the SSID of the network you're attached to:
@@ -69,4 +94,7 @@ void printWiFiStatus(){
 	Serial.println(" dBm");
 
 }
+
+
+
 
