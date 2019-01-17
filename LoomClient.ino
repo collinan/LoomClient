@@ -17,7 +17,7 @@ int status = WL_IDLE_STATUS;// the WiFi radio's status
 
 //Socket
 const uint16_t port = 8090;
-const char * host = "127.0.0.1";//ip on which server is running
+const char * host = "192.168.1.122";//ip on which server is running
 
 
 
@@ -34,25 +34,16 @@ void setup(){
 
 }
 
-
+/*-----------------Main Loop-----------------*/
 void loop(){
 
-	WiFiClient client;
 
-	if(!client.connect(host, port)){
-
-		Serial.println("Connection to host failed");
-		delay(1000);
-		return;
-	}
-
-	Serial.println("Connected to server successful!");
 	
 
-
-
-
+	ServerCommunication();
+	
 }
+/*-----------------Main Loop-----------------*/
 
 
 
@@ -94,6 +85,68 @@ void printWiFiStatus(){
 	Serial.println(" dBm");
 
 }
+
+void ServerCommunication(){
+
+Serial.print("Attempting to connect to Host:");
+Serial.print(host);
+Serial.print(" : ");
+Serial.print("Port");
+Serial.println(port);
+
+WiFiClient client;
+
+if(!client.connect(host,port)){
+Serial.println("Connection failed");
+delay(5000);
+return;
+}
+
+Serial.println("Connected to server successful!");
+
+//sending data to server
+Serial.println("Sending Data to server");
+if(client.connected()){
+  client.println("This is my data sent by client");
+}
+
+//wait for server to sent message
+//timeout after 6 seconds
+unsigned long timeout = millis();
+while (client.available() == 0){ //while no bytes recived
+if(millis() - timeout > 6000){
+Serial.println("-----Done waiting-----");
+client.stop();
+delay(5000);
+return;
+}
+}
+
+//Server message received
+Serial.println("Server message received");
+while(client.available()){
+char ch = static_cast<char>(client.read());
+Serial.print(ch);
+}
+
+Serial.println();
+
+//End Connection
+Serial.println("Ending connection with Server");
+client.stop(); 
+
+
+delay(120000);
+Serial.println();
+return;
+}
+
+
+
+
+
+
+
 
 
 
