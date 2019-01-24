@@ -11,11 +11,11 @@ DHT dht(DHTPIN, DHTTYPE);
 //char pass[]=SECRET_PASS;//your network password (use for WPA, or use a key for WEP)
 
 
-//char ssid[]="SDTeam6";//your network SSID (name)
-char ssid[]="robot";//your network SSID (name)
+char ssid[]="SDTeam6";//your network SSID (name)
+//char ssid[]="robot";//your network SSID (name)
 char pass[]="password2";//your network password (use for WPA, or use a key for WEP)
 
-String DeviceID ="123456";
+String DeviceID ="111001";
 
 int KeyIndex=0;//your network key Index number (for WEP)
 
@@ -24,8 +24,9 @@ int status = WL_IDLE_STATUS;// the WiFi radio's status
 
 //Socket
 const uint16_t port = 8090;
-//const char * host = "192.168.1.122";//ip on which server is running
-const char * host = "10.0.1.2";//ip on which server is running
+const char * host = "192.168.1.125";//ip on which server is running
+//const char * host = "127.0.0.1";
+//const char * host = "10.0.1.2";//ip on which server is running
 
 
 void setup(){
@@ -40,8 +41,8 @@ void setup(){
 Serial.println(F("DHTxx test!"));
 
   dht.begin();
-	//WifiSecureConnect();
-	WifiOpenConnect();
+	WifiSecureConnect();
+	//WifiOpenConnect();
 }
 
 /*-----------------Start: Main Loop-----------------*/
@@ -59,14 +60,17 @@ delay(12000);
 
 /*-----------------Start: Secure Wifi Connect -----------------*/
 void WifiSecureConnect(){
-
+Serial.print("Attempting to connect to WiFi network: ");
+Serial.println(ssid);
+	
 	//attempt to connect to  WiFi network:
 	while(status != WL_CONNECTED){
-		//Serial.print("Attempting to connect to SSID: ");
-		//Serial.println(ssid);
+		Serial.print("Attempting to connect to SSID: ");
+		Serial.println(ssid);
 
 		//Connect to WPA/WPA2 network
 		status = WiFi.begin(ssid, pass);
+    
 		//Connect to WPE
 		//status = WiFI.begin(ssid,KeyIndex,key);
 
@@ -82,6 +86,10 @@ void WifiSecureConnect(){
 
 /*-----------------Start: Open Wifi Connect -----------------*/
 void WifiOpenConnect(){
+
+Serial.print("Attempting to connect to WiFi network: ");
+Serial.println(ssid);
+  
 	while (status != WL_CONNECTED){
 		Serial.print("Attempting to connct to open SSID: ");
 	//	Serial.println(ssid);
@@ -98,8 +106,8 @@ void WifiOpenConnect(){
 /*-----------------Start: Print wifi Status -----------------*/
 void printWiFiStatus(){
 	//print the SSID of the network you're attached to:
-	//Serial.print("Network SSID: ");
-	//Serial.println(WiFi.SSID());
+	Serial.print("Network SSID: ");
+	Serial.println(WiFi.SSID());
 	//print network type:
 	byte encryption = WiFi.encryptionType();
 	//Serial.print(" Network Encryption Type:");
@@ -108,8 +116,8 @@ void printWiFiStatus(){
 
 	//print your WiFi sheild's IP address:
 	IPAddress ip = WiFi.localIP();
-	//Serial.print("My IP Address: ");
-	//Serial.println(ip);
+	Serial.print("My IP Address: ");
+	Serial.println(ip);
 
 	//print your MAC address:
 	byte mac[6];
@@ -139,11 +147,11 @@ void printWiFiStatus(){
 /*-----------------Start: Server Communication-----------------*/
 void ServerCommunication(String ID, String msg){
 
-//	Serial.print("Attempting to connect to Server/Host:");
-//	Serial.print(host);
-//	Serial.print(" : ");
-//	Serial.print("Port");
-//	Serial.println(port);
+Serial.print("Attempting to connect to Server/Host:");
+	Serial.print(host);
+	Serial.print(" : ");
+	Serial.print("Port");
+	Serial.println(port);
 
 	WiFiClient client;
 
@@ -155,7 +163,7 @@ void ServerCommunication(String ID, String msg){
 
 //	Serial.println("Connected to server successful!");
 
-String message= String("Device: "+ID+" "+msg+"$$");
+String message= String(ID+","+msg);
 	//sending data to server
 //	Serial.print("Sending Data to server:");
 //  Serial.println("msg");
@@ -180,7 +188,7 @@ String message= String("Device: "+ID+" "+msg+"$$");
 //	Serial.println("Server message received");
 	while(client.available()){
 		char ch = static_cast<char>(client.read());
-//		Serial.print(ch);
+		Serial.print(ch);
 	}
 
 //	Serial.println();
@@ -212,9 +220,6 @@ delay(2000);
   // Read temperature as Fahrenheit (isFahrenheit = true)
   float f = dht.readTemperature(true);
 
-  String Humidity= String(h,3);
-  String TempC = String(t,3); 
-  String TempF = String(f,3);
   
   // Check if any reads failed and exit early (to try again).
   if (isnan(h) || isnan(t) || isnan(f)) {
@@ -241,9 +246,14 @@ Serial.print(F("Humidity: "));
   Serial.print(hif);
   Serial.println(F("°F"));
 
-String message = String("Humidity: "+Humidity+"%  Temperature: "+TempC +"°C "+ TempF+ "°F");  
-//send to server
-ServerCommunication(DeviceID, message);
+  String Humidity = String(h,2);
+  String TempC = String(t,2); 
+  String TempF = String(f,2);
+
+  String message = String(Humidity+","+TempC +","+TempF);
+  Serial.println(message);
+  //send to server
+  ServerCommunication(DeviceID, message);
 }
 /*-----------------End: Temperature and Humidity Sensor-----------------*/
 
